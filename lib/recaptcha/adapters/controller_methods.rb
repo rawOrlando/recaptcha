@@ -31,6 +31,7 @@ module Recaptcha
               Recaptcha.verify_via_api_call(recaptcha_response, options.merge(with_reply: true))
             # success
 
+            Rails.logger.warn("Recaptcha: verify recall success: #{success}, reply #{@_recaptcha_reply}")
             # all valid responses return true
             return true
           end
