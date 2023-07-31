@@ -14,50 +14,52 @@ module Recaptcha
 
         return true
 
+        model = options[:model]
+        attribute = options.fetch(:attribute, :base)
+        recaptcha_response = options[:response] || recaptcha_response_token(options[:action])
 
-        # model = options[:model]
-        # attribute = options.fetch(:attribute, :base)
-        # recaptcha_response = options[:response] || recaptcha_response_token(options[:action])
+        begin
+          verified = if Recaptcha.invalid_response?(recaptcha_response)
+            false
+          else
+            # unless options[:skip_remote_ip]
+            #   remoteip = (request.respond_to?(:remote_ip) && request.remote_ip) || (env && env['REMOTE_ADDR'])
+            #   options = options.merge(remote_ip: remoteip.to_s) if remoteip
+            # end
 
-        # begin
-        #   verified = if Recaptcha.invalid_response?(recaptcha_response)
-        #     false
-        #   else
-        #     unless options[:skip_remote_ip]
-        #       remoteip = (request.respond_to?(:remote_ip) && request.remote_ip) || (env && env['REMOTE_ADDR'])
-        #       options = options.merge(remote_ip: remoteip.to_s) if remoteip
-        #     end
+            # success, @_recaptcha_reply =
+            #   Recaptcha.verify_via_api_call(recaptcha_response, options.merge(with_reply: true))
+            # success
 
-        #     success, @_recaptcha_reply =
-        #       Recaptcha.verify_via_api_call(recaptcha_response, options.merge(with_reply: true))
-        #     success
-        #   end
+            # all valid responses return true
+            return true
+          end
 
-        #   if verified
-        #     flash.delete(:recaptcha_error) if recaptcha_flash_supported? && !model
-        #     true
-        #   else
-        #     recaptcha_error(
-        #       model,
-        #       attribute,
-        #       options.fetch(:message) { Recaptcha::Helpers.to_error_message(:verification_failed) }
-        #     )
-        #     false
-        #   end
-        # rescue Timeout::Error
-        #   if Recaptcha.configuration.handle_timeouts_gracefully
-        #     recaptcha_error(
-        #       model,
-        #       attribute,
-        #       options.fetch(:message) { Recaptcha::Helpers.to_error_message(:recaptcha_unreachable) }
-        #     )
-        #     false
-        #   else
-        #     raise RecaptchaError, 'Recaptcha unreachable.'
-        #   end
-        # rescue StandardError => e
-        #   raise RecaptchaError, e.message, e.backtrace
-        # end
+          if verified
+            flash.delete(:recaptcha_error) if recaptcha_flash_supported? && !model
+            true
+          else
+            recaptcha_error(
+              model,
+              attribute,
+              options.fetch(:message) { Recaptcha::Helpers.to_error_message(:verification_failed) }
+            )
+            false
+          end
+        rescue Timeout::Error
+          if Recaptcha.configuration.handle_timeouts_gracefully
+            recaptcha_error(
+              model,
+              attribute,
+              options.fetch(:message) { Recaptcha::Helpers.to_error_message(:recaptcha_unreachable) }
+            )
+            false
+          else
+            raise RecaptchaError, 'Recaptcha unreachable.'
+          end
+        rescue StandardError => e
+          raise RecaptchaError, e.message, e.backtrace
+        end
       end
 
       def verify_recaptcha!(options = {})
