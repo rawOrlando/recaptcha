@@ -95,6 +95,7 @@ module Recaptcha
 
   def self.verify_via_api_call_free(response, options)
     secret_key = options.fetch(:secret_key) { configuration.secret_key! }
+    Rails.logger.warn("Recaptcha Secret Key: #{secret_key}") 
     verify_hash = { 'secret' => secret_key, 'response' => response }
     verify_hash['remoteip'] = options[:remote_ip] if options.key?(:remote_ip)
 
