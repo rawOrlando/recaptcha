@@ -12,8 +12,6 @@ module Recaptcha
         options = {model: options} unless options.is_a? Hash
         return true if Recaptcha.skip_env?(options[:env])
 
-        return true
-
         model = options[:model]
         attribute = options.fetch(:attribute, :base)
         recaptcha_response = options[:response] || recaptcha_response_token(options[:action])
