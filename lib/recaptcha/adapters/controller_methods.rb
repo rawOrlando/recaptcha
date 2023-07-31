@@ -22,13 +22,13 @@ module Recaptcha
           verified = if Recaptcha.invalid_response?(recaptcha_response)
             false
           else
-            # unless options[:skip_remote_ip]
-            #   remoteip = (request.respond_to?(:remote_ip) && request.remote_ip) || (env && env['REMOTE_ADDR'])
-            #   options = options.merge(remote_ip: remoteip.to_s) if remoteip
-            # end
+            unless options[:skip_remote_ip]
+              remoteip = (request.respond_to?(:remote_ip) && request.remote_ip) || (env && env['REMOTE_ADDR'])
+              options = options.merge(remote_ip: remoteip.to_s) if remoteip
+            end
 
-            # success, @_recaptcha_reply =
-            #   Recaptcha.verify_via_api_call(recaptcha_response, options.merge(with_reply: true))
+            success, @_recaptcha_reply =
+              Recaptcha.verify_via_api_call(recaptcha_response, options.merge(with_reply: true))
             # success
 
             # all valid responses return true
